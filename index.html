@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cho cá ăn">
+<meta name="theme-color" content="#0B2227">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Máy cho cá ăn</title>
+<style>
+:root{--bg:#0B2227;--surf:#12343B;--line:#1F4A53;--txt:#E6F3F1;--dim:#8FB3B5;--koi:#FF6A2B;--ok:#58D6A4;--warn:#F2C14E;--bad:#FF7B7B}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.45 ui-rounded,"SF Pro Rounded",system-ui,-apple-system,sans-serif}
+body{min-height:100%;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 24px);max-width:480px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--dim)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--dim)}
+.on .dot{background:var(--ok)}.warn .dot{background:var(--warn)}.bad .dot{background:var(--bad)}
+button{font:inherit;color:inherit}
+.gear{background:none;border:0;font-size:22px;padding:8px;cursor:pointer}
+#hero{display:block;margin:20px auto 6px;width:224px;height:224px;position:relative;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:pointer}
+#hero svg{width:100%;height:100%;transform:rotate(-90deg)}
+#hero .t{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
+#hero .t b{font-size:22px;letter-spacing:-.01em}
+#hero .t small{color:var(--dim);font-size:13px;margin-top:2px}
+#hero.off{opacity:.45;cursor:not-allowed}
+#hero.feeding .t b{color:var(--koi)}
+.next{text-align:center;color:var(--dim);margin:0 0 18px;font-variant-numeric:tabular-nums}
+.next b{color:var(--txt)}
+.card{background:var(--surf);border-radius:18px;padding:4px 16px;margin-bottom:14px}
+.row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.step{display:flex;align-items:center;gap:10px;font-variant-numeric:tabular-nums}
+.step button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--bg);font-size:20px;cursor:pointer}
+.step button:active{background:var(--line)}
+.step b{min-width:2ch;text-align:center;font-size:18px}.step small{color:var(--dim);width:3.2ch}
+.sw{appearance:none;-webkit-appearance:none;width:51px;height:31px;border-radius:16px;background:var(--line);position:relative;transition:background .2s;margin:0}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw:checked{background:var(--ok)}.sw:checked::after{transform:translateX(20px)}
+h2{font-size:15px;margin:18px 4px 8px;color:var(--dim);font-weight:600}
+ol{list-style:none;margin:0;padding:0}
+li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+li:last-child{border:0}li time{color:var(--dim);white-space:nowrap}
+.meta{text-align:center;color:var(--dim);font-size:12px;margin-top:14px}
+dialog{background:var(--surf);color:var(--txt);border:1px solid var(--line);border-radius:20px;width:min(92vw,440px);padding:20px}
+dialog::backdrop{background:#000a}
+label.f{display:block;font-size:13px;color:var(--dim);margin:12px 0 4px}
+input[type=text],input[type=password],input[type=url]{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--txt);font:inherit;font-size:16px}
+.btns{display:flex;gap:10px;margin-top:18px}
+.btns button{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
+.btns .pri{background:var(--koi);border-color:var(--koi);color:#1b0a02;font-weight:700}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Máy cho cá ăn</h1><span class="pill" id="pill"><i class="dot"></i><span id="pt">Đang kết nối…</span></span></div>
+  <button class="gear" id="gear" aria-label="Cài đặt kết nối">⚙︎</button>
+</header>
+
+<button id="hero" class="off" aria-label="Giữ để cho ăn">
+  <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="88" fill="var(--surf)" stroke="var(--line)" stroke-width="10"/>
+  <circle id="p" cx="100" cy="100" r="88" fill="none" stroke="var(--koi)" stroke-width="10" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="553"/></svg>
+  <div class="t"><b id="hb">Chưa sẵn sàng</b><small id="hs"></small></div>
+</button>
+<p class="next" id="next">&nbsp;</p>
+
+<section class="card">
+  <label class="row"><span>Tự động cho ăn</span><input type="checkbox" class="sw" id="auto"></label>
+  <div class="row"><span>Cách nhau</span><div class="step"><button data-k="h" data-d="-1" aria-label="Giảm">−</button><b id="h">–</b><small>giờ</small><button data-k="h" data-d="1" aria-label="Tăng">+</button></div></div>
+  <div class="row"><span>Motor chạy</span><div class="step"><button data-k="s" data-d="-1" aria-label="Giảm">−</button><b id="s">–</b><small>giây</small><button data-k="s" data-d="1" aria-label="Tăng">+</button></div></div>
+</section>
+
+<h2>Nhật ký</h2>
+<section class="card"><ol id="log"></ol></section>
+<p class="meta" id="meta"></p>
+
+<dialog id="dlg"><form method="dialog" id="f">
+  <h1>Kết nối máy chủ</h1>
+  <label class="f" for="url">Địa chỉ WebSocket (wss://…)</label>
+  <input type="url" id="url" placeholder="wss://xxxx.emqxsl.com:8084/mqtt" autocapitalize="off" autocorrect="off">
+  <label class="f" for="user">Tài khoản (dành cho app)</label>
+  <input type="text" id="user" autocapitalize="off" autocorrect="off">
+  <label class="f" for="pass">Mật khẩu</label>
+  <input type="password" id="pass">
+  <label class="f" for="id">Mã thiết bị (trùng DEVICE_ID trong code)</label>
+  <input type="text" id="id" autocapitalize="off" autocorrect="off">
+  <div class="btns"><button type="button" id="cancel">Đóng</button><button class="pri" value="save">Lưu và kết nối</button></div>
+</form></dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<script>
+const $=s=>document.querySelector(s), RING=553;
+const ls={get:k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let cfg=ls.get('cfg'), st=null, stAt=0, cli=null, conn='connecting', lastFed=0, logs=ls.get('log')||[];
+const T=x=>'fishfeeder/'+cfg.id+'/'+x;
+const two=n=>String(n).padStart(2,'0');
+const fmt=d=>two(d.getHours())+':'+two(d.getMinutes())+' '+two(d.getDate())+'/'+two(d.getMonth()+1);
+
+function addLog(t){logs.unshift({t,at:Date.now()});logs=logs.slice(0,15);ls.set('log',logs);drawLog()}
+function drawLog(){$('#log').innerHTML=logs.length?logs.map(l=>'<li><span>'+l.t+'</span><time>'+fmt(new Date(l.at))+'</time></li>').join(''):'<li><span>Chưa có sự kiện nào</span></li>'}
+
+function setRing(off,dur){const r=$('#p');r.style.transition='stroke-dashoffset '+dur+'s linear';r.style.strokeDashoffset=off}
+function send(m){if(cli&&cli.connected)cli.publish(T('cmd'),m,{qos:1,retain:false})}  // không bao giờ retain lệnh
+
+function connect(){
+  if(cli){try{cli.end(true)}catch(e){}cli=null}
+  if(!cfg){openCfg();return}
+  conn='connecting';render();
+  cli=mqtt.connect(cfg.url,{username:cfg.user,password:cfg.pass,clientId:'app-'+Math.random().toString(16).slice(2,10),reconnectPeriod:3000,connectTimeout:8000,clean:true});
+  cli.on('connect',()=>{conn='ok';cli.subscribe(T('state'));render()});
+  cli.on('close',()=>{conn='down';render()});
+  cli.on('error',()=>{conn='down';render()});
+  cli.on('message',(t,m)=>{try{onState(JSON.parse(m.toString()))}catch(e){}});
+}
+
+function onState(s){
+  const p=st;
+  if(p){
+    if(!p.feeding&&s.feeding){addLog('Bắt đầu cho ăn');}
+    if(p.feeding&&!s.feeding){addLog(s.count>p.count?'Đã cho ăn xong':'Đã dừng motor')}
+    if(!p.online&&s.online)addLog('Máy đã kết nối');
+    if(p.online&&!s.online)addLog(s.sleep?'Máy đi ngủ':'Máy mất kết nối');
+  }
+  if(s.feeding&&!(p&&p.feeding)){setRing(0,0);$('#p').getBoundingClientRect();setRing(RING,s.s)}
+  if(!s.feeding&&(!p||p.feeding))setRing(RING,.3);
+  st=s;stAt=Date.now();render();
+}
+
+function render(){
+  const pill=$('#pill'),pt=$('#pt'),hero=$('#hero');
+  let cls='',txt;
+  if(conn==='connecting'){txt='Đang kết nối…';cls='warn'}
+  else if(conn==='down'){txt='Chưa nối được máy chủ';cls='bad'}
+  else if(!st){txt='Đang chờ máy…';cls='warn'}
+  else if(st.sleep){txt='Máy đang ngủ';cls='warn'}
+  else if(!st.online){txt='Máy ngoại tuyến';cls='bad'}
+  else{txt='Máy trực tuyến';cls='on'}
+  pill.className='pill '+cls;pt.textContent=txt;
+  const live=conn==='ok'&&st&&st.online;
+  hero.classList.toggle('off',!live);hero.classList.toggle('feeding',!!(live&&st.feeding));
+  if(!live){$('#hb').textContent=st&&st.sleep?'Đang ngủ':'Chưa sẵn sàng';$('#hs').textContent=st&&st.sleep?'Bấm MENU trên máy để đánh thức':'Kiểm tra nguồn và WiFi của máy'}
+  else if(st.feeding){$('#hb').textContent='Đang cho ăn';$('#hs').textContent='Chạm để dừng'}
+  else{$('#hb').textContent='Giữ để cho ăn';$('#hs').textContent='Giữ khoảng 1 giây'}
+  if(st){$('#auto').checked=!!st.auto;$('#h').textContent=st.h;$('#s').textContent=st.s;
+    $('#meta').textContent='Đã cho ăn '+st.count+' lần từ lúc bật nguồn · WiFi '+st.rssi+' dBm'}
+  tick();
+}
+
+function tick(){
+  const n=$('#next');
+  if(!st||!st.online||conn!=='ok'){n.innerHTML='&nbsp;';return}
+  if(st.feeding){n.innerHTML='&nbsp;';return}
+  if(!st.auto){n.textContent='Tự động đang tắt';return}
+  const r=Math.max(0,st.next-Math.floor((Date.now()-stAt)/1000));
+  n.innerHTML='Cho ăn tự động sau <b>'+two(Math.floor(r/3600))+':'+two(Math.floor(r/60)%60)+':'+two(r%60)+'</b>';
+}
+setInterval(tick,1000);
+
+// Giữ 0,9 giây để cho ăn (tránh chạm nhầm)
+const hero=$('#hero');let holdT=null;
+hero.addEventListener('pointerdown',e=>{
+  if(!(conn==='ok'&&st&&st.online&&!st.feeding))return;
+  setRing(0,.9);holdT=setTimeout(()=>{holdT=null;lastFed=Date.now();send('FEED')},900)});
+const rel=()=>{if(holdT){clearTimeout(holdT);holdT=null;setRing(RING,.25)}};
+['pointerup','pointercancel','pointerleave'].forEach(ev=>hero.addEventListener(ev,rel));
+hero.addEventListener('click',()=>{if(st&&st.feeding&&Date.now()-lastFed>1500)send('STOP')});
+hero.addEventListener('contextmenu',e=>e.preventDefault());
+
+$('#auto').addEventListener('change',e=>{send('AUTO:'+(e.target.checked?1:0))});
+const LIM={h:[1,24,'INTERVAL'],s:[1,30,'MOTOR']};
+document.querySelectorAll('.step button').forEach(b=>b.addEventListener('click',()=>{
+  if(!st)return;const k=b.dataset.k,[lo,hi,c]=LIM[k];
+  const v=Math.min(hi,Math.max(lo,st[k]+Number(b.dataset.d)));
+  if(v===st[k])return;st[k]=v;render();send(c+':'+v)}));
+
+function openCfg(){const c=cfg||{};$('#url').value=c.url||'';$('#user').value=c.user||'';$('#pass').value=c.pass||'';$('#id').value=c.id||'';$('#dlg').showModal()}
+$('#gear').onclick=openCfg;$('#cancel').onclick=()=>$('#dlg').close();
+$('#f').addEventListener('submit',()=>{
+  const c={url:$('#url').value.trim(),user:$('#user').value.trim(),pass:$('#pass').value,id:$('#id').value.trim().toLowerCase()};
+  if(!c.url||!c.id)return;cfg=c;ls.set('cfg',c);st=null;connect()});
+
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cfg&&(!cli||!cli.connected))connect()});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+drawLog();render();connect();
+</script>
+</body>
+</html>
